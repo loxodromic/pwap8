@@ -120,5 +120,5 @@ icons to be stored inline. Along the same lines as the existing PICO-8 exports.
 
 ## Version history
 
-1.0.0: [22 Jan 2020] begin at the beginning
-1.0.1: [22 Jan 2020] fix to allow the files to be served from a sub-dir
++ 1.0.0: [22 Jan 2020] begin at the beginning
++ 1.0.1: [22 Jan 2020] fix to allow the files to be served from a sub-dir
