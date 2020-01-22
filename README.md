@@ -19,10 +19,11 @@ play your game in a browser.
 This hack adds a few bits and bobs to that export to enable 
 "progressive web app" features. Most useful of which is that your game will
 work offline after it's been played the first time. Handy for playing when 
-you're offline.
+you're offline. When viewed for the first time, the browser may even ask you 
+if you want to "install" this app.
 
 
-These days, modern browsers may give you the option to "install" your app. 
+These days, modern browsers give you the option to "install" your app. 
 Imagine that: your own game, on your own homescreen, available anywhere.
 
 
@@ -89,6 +90,16 @@ nearest pixel interpolation, larger images using bicubic (TODO: make this user s
 
 For testing purposes there is a very simple Python http server in the simple_server dir.
 Run `python simple_server.py` from the build directory.
+
+
+Either use that for local testing, or copy to your favourite host, in my case I uploaded the 
+test above to https://loxodromic.github.io/pwatest/
+
+
+You can now "install the app" when you visit the site.
+
+
+Gaming on the go, excellent.
 
 
 ## TODO

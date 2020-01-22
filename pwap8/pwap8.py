@@ -112,7 +112,7 @@ class PWAP8:
         manifest = {
             'name': self.projectName,
             'short_name': self.projectNameShort,
-            'start_url': '/index.html',
+            'start_url': 'index.html',
             'display': 'standalone',
             'theme_color': 'white',
             'background_color': 'white',
@@ -240,12 +240,13 @@ self.addEventListener('fetch', function(event) {{
 
         iconFilenames = self._createIcons()
 
-        cachedThings = ['/', '/index.html', '/' + self.javascriptFile, '/sw.js', '/' + manifestFilename]
+        #cachedThings = ['/', '/index.html', '/' + self.javascriptFile, '/sw.js', '/' + manifestFilename]
+        cachedThings = ['index.html', self.javascriptFile, 'sw.js', manifestFilename]
         for (path, filename) in iconFilenames:
             if path is not None:
-                cachedThings.append("/{path}/{filename}".format(path = path, filename = filename))
+                cachedThings.append("{path}/{filename}".format(path = path, filename = filename))
             else:
-                cachedThings.append('/' + filename)
+                cachedThings.append(filename)
 
         swJS = self._createServiceWorker(cachedThings)
         with open(os.path.join(self.buildDir, 'sw.js'), "w") as fout:
