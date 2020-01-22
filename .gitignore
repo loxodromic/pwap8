@@ -1,0 +1,4 @@
+.vs/*
+test/build/*
+test/test_html/*
+test/*.p8.png
