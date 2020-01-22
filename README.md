@@ -120,5 +120,5 @@ icons to be stored inline. Along the same lines as the existing PICO-8 exports.
 
 ## Version history
 
-1.0.0: begin at the beginning
+1.0.1: begin at the beginning
 
