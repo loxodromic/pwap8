@@ -23,7 +23,6 @@ you're offline. When viewed for the first time, the browser may even ask you
 if you want to "install" this app.
 
 
-These days, modern browsers give you the option to "install" your app. 
 Imagine that: your own game, on your own homescreen, available anywhere.
 
 
@@ -32,10 +31,10 @@ It does this:
  + Creating a few icons and whatnot that Google's Lighthouse audit likes
  + Creating a service worker to initially cache, then serve files when offline
  + Adding some noddy content to display when JavaScript is disabled (another Lighthouse warning)
-
+ 
 
  There are a Visual Studio projects and a solution. That was just for my 
- convenience, the code should be standard Python 3.
+ convenience, the code should be standard, portable, Python 3.
 
  
  Although I've released this project under a MIT licence, if you pass your 
@@ -93,7 +92,7 @@ Run `python simple_server.py` from the build directory.
 
 
 Either use that for local testing, or copy to your favourite host, in my case I uploaded the 
-test above to https://loxodromic.github.io/pwatest/
+test build above to https://loxodromic.github.io/pwatest/
 
 
 You can now "install the app" when you visit the site.
@@ -116,9 +115,13 @@ icons to be stored inline. Along the same lines as the existing PICO-8 exports.
 + More documentation is always nice.
 + Extract icon graphic from .p8 screengrab (F7).
 + There is almost no error checking / exception handling, expect crash reports.
++ Create an inline question to ask about allowing cookies / data.
 
 
 ## Version history
 
 + 1.0.0: [22 Jan 2020] begin at the beginning
-+ 1.0.1: [22 Jan 2020] fix to allow the files to be served from a sub-dir
++ 1.0.1: [22 Jan 2020] FIX: to allow the files to be served from a sub-dir
++ 1.1.0: [23 Jan 2020] ADD: option to specify another file as the index (e.g. 
+for those cookie questions) and to copy the original file to the output. 
+ADD: a comment to the output, so that you know it's been modified.

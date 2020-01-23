@@ -6,6 +6,8 @@
 
 from bs4 import BeautifulSoup
 from bs4 import Doctype
+from bs4 import Comment
+
 from PIL import Image
 
 import os
@@ -27,6 +29,9 @@ class PWAP8:
         self.buildDir = None
         self.faviconStyle = "png"
         self.bInlineManifest = False
+        self.copyOriginal = False
+        self.index = None
+        self.appRootHTML = 'index.html'
 
         self.iconSizes = [32, 128, 144, 152, 167, 180, 192, 256, 512]
 
@@ -58,21 +63,25 @@ class PWAP8:
 
 
     def _tweakHTML(self, soup, manifest, swJS):
-        #TODO: adding a DOCTYPE seems to mess with the finished game's layout, a browser issue?...
+        #TODO: adding a DOCTYPE seems to mess with the finished game's layout, a browser issue, quirks mode?...
         #prefix with <!DOCTYPE html>...
         #doctype = Doctype('html')
         #soup.insert(0, doctype)
 
+
         #tweak head...
         head = soup.head
 
+        comment = Comment("This file has been modified by pwap8 (https://github.com/loxodromic/pwap8)")
+        head.insert(0, comment)
+
         #add some meta tags for colours, icons, etc...
-        head.append(soup.new_tag('meta', attrs={'name': 'theme-color', 'content': 'white'}))
+        head.append(soup.new_tag('meta', attrs={'name': 'theme-color', 'content': '#cccccc'}))
         head.append(soup.new_tag('meta', attrs={'name': 'apple-mobile-web-app-capable', 'content': 'yes'}))
-        head.append(soup.new_tag('meta', attrs={'name': 'apple-mobile-web-app-status-bar-style', 'content':'black'}))
+        head.append(soup.new_tag('meta', attrs={'name': 'apple-mobile-web-app-status-bar-style', 'content':'#222222'}))
         head.append(soup.new_tag('meta', attrs={'name': 'apple-mobile-web-app-title', 'content':soup.title.string}))
         head.append(soup.new_tag('meta', attrs={'name': 'msapplication-TileImage', 'content':"images/{name}-icon-144.png".format(name=self.projectNameShort)}))
-        head.append(soup.new_tag('meta', attrs={'name': 'msapplication-TileColor', 'content':'#FFFFFF'}))
+        head.append(soup.new_tag('meta', attrs={'name': 'msapplication-TileColor', 'content':'#cccccc'}))
 
 
         #favicons...
@@ -112,10 +121,10 @@ class PWAP8:
         manifest = {
             'name': self.projectName,
             'short_name': self.projectNameShort,
-            'start_url': 'index.html',
+            'start_url': self.appRootHTML,
             'display': 'standalone',
-            'theme_color': 'white',
-            'background_color': 'white',
+            'theme_color': '#cccccc',
+            'background_color': '#222222',
             'lang': 'en-US'
         }
 
@@ -132,6 +141,8 @@ class PWAP8:
         cachedStr = json.dumps(cachedThings)
 
         swJS = """//sw.js...
+//see https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API/Using_Service_Workers
+
 var cacheName = '{name}';
 
 self.addEventListener('install', function(event) {{
@@ -227,8 +238,29 @@ self.addEventListener('fetch', function(event) {{
         print("JAVASCRIPT = {js}".format(js=self.srcJS))
         print("ICON = {icon}".format(icon=self.srcICON))
         print("BUILD_DIR = {build}".format(build=self.buildDir))
+        if self.index is not None:
+            print("INDEX = {index}".format(index=self.index))
+        if self.copyOriginal:
+            print("Will copy original html")
 
         self._createDirs()
+
+
+        if self.copyOriginal:
+            dstHTML = os.path.join(self.buildDir, 'original.html')
+            try:
+                shutil.copy(self.srcHTML, dstHTML)
+            except OSError:
+                print("\nERROR: unable to copy original html file ({html})".format(html=self.srcHTML))
+                sys.exit()
+
+
+        dstHTML = 'index.html'
+        if self.index is not None:
+            dstHTML = 'app.html'
+           
+        self.appRootHTML = dstHTML
+
 
         #create manifest, icons, service worker...
         manifestFilename = "{name}.manifest".format(name=self.projectNameShort)
@@ -267,7 +299,7 @@ self.addEventListener('fetch', function(event) {{
         self._tweakHTML(soup, manifest, swJS)
 
         #write it out to the build dir...
-        with open(os.path.join(self.buildDir, "index.html"), "w") as fout:
+        with open(os.path.join(self.buildDir, dstHTML), "w") as fout:
             fout.write(str(soup.prettify()))
 
         dstJS = os.path.join(self.buildDir, self.javascriptFile)
@@ -278,6 +310,13 @@ self.addEventListener('fetch', function(event) {{
             print("\nERROR: unable to find exported JavaScript ({js})".format(js=self.srcJS))
             sys.exit()
 
+        if self.index is not None:
+            try:
+                dstIndex = os.path.join(self.buildDir, 'index.html')
+                shutil.copy(self.index, dstIndex)
+            except OSError:
+                print("\nERROR: unable to copy replacement index ({html})".format(html=self.index))
+                sys.exit()
 
 #....
 
@@ -294,10 +333,12 @@ MIT License (see LICENSE)\n""")
     parser.add_argument('--name', nargs=1, type=str, metavar='PROJECT_NAME', help='project name', required=True)
     parser.add_argument('--short', nargs=1, type=str, metavar='SHORT_NAME', help='short project name', required=False)
     parser.add_argument('--icon', nargs=1, type=str, metavar='<ICON>', help='an image to use for the icons', required=False)
+    parser.add_argument('--original', help='also copy the original html to the build directory', required=False, action='store_true')
 
     srcGroup = parser.add_argument_group('source')
     srcGroup.add_argument('--html', nargs=1, type=str, metavar='<EXPORT.html>', help='PICO-8 exported HTML', required=True)
     srcGroup.add_argument('--js', nargs=1, type=str, metavar='<JAVASCRIPT.js>', help='PICO-8 exported JavsScript', required=True)
+    srcGroup.add_argument('--index', nargs=1, type=str, metavar='<INDEX.html>', help='use a different file for the index.html (perhaps a cookie question)', required=False)
 
     #TODO: intelligently determine html and JS filenames from just a dir...
     #srcGroup.add_argument('--dir', nargs=1, type=str, metavar='<DIRECTORY>', help='Directory containing PICO-8 exported HTML and JavaScript')
@@ -321,6 +362,13 @@ MIT License (see LICENSE)\n""")
    
     if args.build is not None:
         pwap8.buildDir = ''.join(args.build)
+
+    pwap8.copyOriginal = args.original
+
+    if args.index is not None:
+        pwap8.index = ''.join(args.index)
+        #if we're asking the question, then we need the original...
+        pwap8.copyOriginal = True
 
     pwap8.Run()
 

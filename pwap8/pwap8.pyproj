@@ -18,7 +18,7 @@
     <InterpreterArguments>
     </InterpreterArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
-    <CommandLineArguments>--name "test app" --short test --html ..\test\test_html\index.html --js ..\test\test_html\test.js --build ..\test\build</CommandLineArguments>
+    <CommandLineArguments>--name "test app" --short test --html ..\test\test_html\index.html --js ..\test\test_html\test.js --build ..\test\build --original --index ..\test\storage_question.html </CommandLineArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
